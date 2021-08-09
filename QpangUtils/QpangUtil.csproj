@@ -11,4 +11,8 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\QUtilLib\QUtilLib.csproj" />
+  </ItemGroup>
+
 </Project>

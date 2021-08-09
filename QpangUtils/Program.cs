@@ -1,14 +1,9 @@
-﻿using System;
-using System.Text;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Diagnostics;
+﻿using QUtilLib.Pkg;
+using System;
 using System.Collections.Generic;
-using System.Collections;
-using QpangUtils.Pkg;
+using System.IO;
 
-namespace QpangUtils
+namespace QPangUtil
 {
     unsafe class Program
     {
@@ -22,10 +17,10 @@ namespace QpangUtils
             Dictionary<PkgEntry, byte[]> result = new Dictionary<PkgEntry, byte[]>();
 
             Console.WriteLine("Unpacking: " + pathOld + filename);
-            result = Pkg.Pkg.PkgUnpack(File.ReadAllBytes(pathOld + filename), out uint header);
+            result = Pkg.PkgUnpack(File.ReadAllBytes(pathOld + filename), out uint header);
 
             // Save all files to disk
-            foreach(var d in result)
+            foreach (var d in result)
             {
                 string filenamed = pathNew + "\\" + d.Key.Filename;
 
@@ -43,7 +38,7 @@ namespace QpangUtils
             Console.WriteLine("Press Enter to start repacking");
             Console.ReadLine();
 
-            byte[] buffResult = Pkg.Pkg.PkgPack(result, pathNew, header);
+            byte[] buffResult = Pkg.PkgPack(result, pathNew, header);
             File.WriteAllBytes(pathNew + "\\" + filename, buffResult);
             Console.WriteLine("Result: " + pathNew + "\\" + filename);
 
@@ -51,6 +46,6 @@ namespace QpangUtils
             Console.ReadLine();
         }
 
-        
+
     }
 }

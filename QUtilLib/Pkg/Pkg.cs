@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using QpangUtils.Helpers;
+using QUtilLib.Helpers;
 
-namespace QpangUtils.Pkg
+namespace QUtilLib.Pkg
 {
     public static class Pkg
     {
