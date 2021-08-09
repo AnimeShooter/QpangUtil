@@ -56,11 +56,11 @@ namespace QUtilLib.Pkg
             return result;
         }
 
-        public static byte[] PkgPack(Dictionary<PkgEntry, byte[]> data, string rootpath, uint header)
+        public static byte[] PkgPack(Dictionary<string, byte[]> data, string rootpath, uint header)
         {
             List<byte> result = new List<byte>();
             List<byte[]> contents = new List<byte[]>();
-            List<PkgEntry> entries = new List<PkgEntry>();
+            List<string> entries = new List<string>();
             List<PkgEntry> updatedEntries = new List<PkgEntry>();
 
             // write file header
@@ -69,10 +69,7 @@ namespace QUtilLib.Pkg
             // pack contents
             foreach (var d in data)
             {
-                string filename = rootpath + "\\" + d.Key.Filename;
-                Console.WriteLine("Packing: " + filename);
-
-                byte[] content = PkgEncode(File.ReadAllBytes(filename));
+                byte[] content = PkgEncode(d.Value);
                 contents.Add(content);
                 entries.Add(d.Key);
             }
@@ -84,7 +81,7 @@ namespace QUtilLib.Pkg
                 int entriesOffset = 4 + entries.Count * 0x88; // entries
                 PkgEntry pkg = new PkgEntry()
                 {
-                    Filename = entries[i].Filename,
+                    Filename = entries[i],
                     StartLocation = (uint)(entriesOffset + contentsOffset),
                     EntrySize = (uint)contents[i].Length
                 };
@@ -110,7 +107,7 @@ namespace QUtilLib.Pkg
             return result.ToArray();
         }
 
-        private static byte[] PkgDecode(byte[] bin)
+        public static byte[] PkgDecode(byte[] bin)
         {
             int size = bin.Length;
             byte[] bout = new byte[size];
@@ -146,7 +143,7 @@ namespace QUtilLib.Pkg
             return bout;
         }
 
-        private static byte[] PkgEncode(byte[] bin)
+        public static byte[] PkgEncode(byte[] bin)
         {
             int size = bin.Length;
             byte[] bout = new byte[size];
