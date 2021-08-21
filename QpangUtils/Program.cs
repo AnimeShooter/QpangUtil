@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Newtonsoft.Json;
 
 namespace QPangUtil
 {
@@ -43,7 +44,9 @@ namespace QPangUtil
         {
             Banner();
 
-            if(args.Length < 3)
+            //ConfToJson(@"L:\Projects\qpang_server\Modding\skill.conf.txt");
+
+            if (args.Length < 3)
             {
                 Help();
                 return;
@@ -55,7 +58,8 @@ namespace QPangUtil
             string output = Directory.GetCurrentDirectory();
 
             bool unpack = true;
-            for(int i = 1; i < args.Length; i++)
+            int i = 1;
+            while(i < args.Length)
             {
                 if(i == args.Length-1)
                     filename = args[i];
@@ -70,15 +74,14 @@ namespace QPangUtil
                         if (args.Length < i + 1)
                             return;
                         output = args[i + 1];
-                        i++; // quick fix TODO: remove!
+                        i++;
                     }
                     else if (args[i].Equals("-u"))
                         unpack = true;
                     else if(args[i].Equals("-p"))
                         unpack = false;
+                i++;
             }
-
-            
 
             if (type.Equals("PKG"))
                 if (unpack)
@@ -87,7 +90,9 @@ namespace QPangUtil
                     PkaPack(filename, output);
             //else if (type.Equals("PACK")) // TODO: add to Lib
             //    return;
-
+            else
+                Help(); // invalid type
+   
             return;
         }
 
@@ -150,6 +155,78 @@ namespace QPangUtil
             Console.WriteLine("[+] Created: " + output);
         }
 
-        
+        static void ConfToJson(string path) // NOTE: quick tool for converting to JSON
+        {
+            var lines = File.ReadLines(path);
+
+            List<SkillCard> objects = new List<SkillCard>();
+            string objName = "";
+            SkillCard current = null;
+            Type type;
+            bool isReading = false;
+            foreach (var line in lines)
+            {
+                if (line == "SkillCard" && objName == "")
+                {
+                    objName = line;
+                    type = typeof(SkillCard);
+                    current = new SkillCard(); ;// (SkillCard)Activator.CreateInstance(type); // eh?
+                    isReading = true;
+                }
+                else if(line == "}" && objName != "")
+                {
+                    objName = "";
+                    objects.Add(current);
+                    isReading = false;
+                }
+
+                string[] colums = line.Split('\t');
+                if(isReading && colums.Length > 3)
+                switch(colums[1])
+                {
+                    case "CodeNm":
+                            current.CodeName = colums[3];
+                        break;
+                    case "ENG_Nm":
+                            current.Name = colums[4];
+                        break;
+                    case "ENG_Desc":
+                            current.Description = colums[3];
+                        break;
+                    case "ItemId":
+                            current.ItemId = Convert.ToUInt32(colums[3].Replace(" ", string.Empty));
+                        break;
+                    case "Rtp":
+                            string tp = colums[4].Replace(" ", string.Empty);
+                            current.Type = Convert.ToByte(tp);
+                        break;
+                    case "Skc":
+                            string pts = colums[4].Replace(" ", string.Empty);
+                            current.Points = Convert.ToByte(pts);
+                        break;
+                    case "Tgt":
+                            string tt = colums[4].Replace(" ", string.Empty);
+                            current.TargetType = Convert.ToByte(tt);
+                        break;
+                    case "Term":
+                            string dr = colums[3].Replace(" ", string.Empty);
+                            current.Duration = Convert.ToByte(dr);
+                        break;
+                    case "Texture":
+                            string tn = colums[3].Replace(" ", string.Empty);
+                            tn = tn.Replace("card_skill_", "");
+                            current.Texture = tn + ".png";
+                        break;
+                }
+                    
+            }
+
+            string jsons = JsonConvert.SerializeObject(objects);
+            File.WriteAllText(path + ".json", jsons);
+
+            Console.WriteLine();
+
+
+        }
     }
 }
